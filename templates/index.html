@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<!--suppress ALL -->
+<html>
+<head>
+    <!--This sets up the CSS style format to give the flask web app a much more cleaner look and
+    gives the flask web app a bunch of functions like add,edit, delete with crud operations-->
+
+    <title>Items</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #332;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        .search-button {
+            display: flex;
+            color: darkcyan;
+        }
+        .search-form {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 5px;
+        }
+
+        .search-button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #fff;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+        }
+
+        li img {
+            max-width: 100%;
+        }
+
+        .add-form {
+            margin-top: 20px;
+        }
+
+        .add-form label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .add-form input,
+        .add-form textarea {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+        }
+
+        .add-form button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        /* Edit form */
+        #edit-form {
+            display: none;
+        }
+
+        #edit-form label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        #edit-form input,
+        #edit-form textarea {
+            width: 100%;
+            padding: 5px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<!--This sets up the template-->
+<header>
+    <h1>Affin's Shoe Store</h1>
+</header>
+
+<div class="container">
+    <form method="POST" action="/" class="search-form">
+        <input type="text" name="searching" class="search-input" placeholder="Search">
+        <button type="submit" class="search-button">Search</button>
+    </form>
+
+    <div>
+        <a href="{{ url_for('index', sort_by='id') }}">Sort by ID</a> |
+        <a href="{{ url_for('index', sort_by='name') }}">Sort by Name</a>
+    </div>
+    <ul>
+    {% for item in items %}
+        <li>
+            <h2>{{ item.to_dict().name }}</h2>
+            <p>{{ item.to_dict().description }}</p>
+            <p>{{ item.to_dict().ID }}</p>
+            {% if item.to_dict().image_url %}
+                <img src="{{ item.to_dict().image_url }}" alt="{{ item.to_dict().name }} Image">
+            {% endif %}
+            <form method="POST" action="{{ url_for('delete_item', item_id=item.id) }}">
+                <button type="submit">Delete</button>
+            </form>
+            <button onclick="editItem('{{ item.id }}', '{{ item.to_dict().name }}', '{{ item.to_dict().description }}')">Edit</button>
+        </li>
+    {% endfor %}
+</ul>
+
+<!--This sets up the template for editing-->
+    <div id="edit-form">
+        <h2>Edit Item</h2>
+        <form method="POST" action="{{ url_for('edit_item', item_id=itemId) }}" class="add-form">
+            <input type="hidden" name="item_id" id="edit-item-id" value="">
+            <label for="name">Name:</label>
+            <input type="text" name="name" id="edit-item-name" required>
+            <label for="description">Description:</label>
+            <textarea name="description" id="edit-item-description" required></textarea>
+            <button type="submit">Save</button>
+            <button type="button" onclick="cancelEdit()">Cancel</button>
+        </form>
+    </div>
+
+    <h2>Add Item</h2>
+<form method="POST" action="{{ url_for('add_item') }}" class="add-form" enctype="multipart/form-data">
+    <label for="name">Name:</label>
+    <input type="text" name="name" required>
+    <label for="description">Description:</label>
+    <textarea name="description" required></textarea>
+    <label for="ID">ID:</label>
+    <input type="text" name="ID" required> <!-- Change this to an input -->
+    <label for="image">Image:</label>
+    <input type="file" name="image" accept="image/*" required>
+    <button type="submit">Add</button>
+</form>
+
+</div>
+<!--This allows the edit button to change ID, Name,and description after clicking save-->
+<script>
+  function editItem(itemId, itemName, itemDescription) {
+    // Populate the edit form with the existing item data
+    document.getElementById('edit-item-id').value = itemId;
+    document.getElementById('edit-item-name').value = itemName;
+    document.getElementById('edit-item-description').value = itemDescription;
+
+    // Set the correct form action URL based on the item ID
+    document.getElementById('edit-form').querySelector('form').action = `/edit_item/${itemId}`;
+
+    // Show the edit form
+    document.getElementById('edit-form').style.display = 'block';
+}
+
+
+    function cancelEdit() {
+        // Hide the edit form
+        document.getElementById('edit-form').style.display = 'none';
+    }
+</script>
+
+
+</body>
+</html>
